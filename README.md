@@ -1,23 +1,110 @@
 # Bad Deed Validator
 
-A Python application that validates real estate deed documents by parsing OCR text, extracting structured data using LLMs, and performing deterministic validation checks.
+A paranoid, production-minded approach to validating OCR-scanned legal deeds using an LLM without trusting it for correctness.
 
-## Overview
+**Core Philosophy:** Use AI to extract structure from messy text. Use deterministic code to decide whether the data is acceptable.
 
-The Bad Deed Validator processes raw deed documents through three stages:
+At no point is the LLM allowed to silently fix, infer, or approve anything.
 
-1. **LLM Parsing** - Converts raw OCR text to structured JSON matching a defined schema
-2. **Validation** - Performs deterministic sanity checks (date order, amount consistency)
-3. **Enrichment** - Matches counties to reference data and attaches tax rates
+## Problem Summary
 
-## Features
+Given:
 
-- **LLM Provider Toggle** - Switch between OpenAI and free LLM API via `USE_OPENAI` flag
-- **Robust Parsing** - Handles OCR noise and variations in deed text
-- **Deterministic Validation** - Date order and monetary amount consistency checks
-- **County Matching** - Fuzzy matching with abbreviation expansion (S. Clara → Santa Clara)
-- **Tax Rate Enrichment** - Attaches canonical county names and tax rates from reference data
-- **Fallback Support** - Uses offline stub when API key is missing or invalid
+- Messy OCR text from a deed
+- A local reference file (`counties.json`) with tax rates
+
+We need to:
+
+- Parse the OCR text into structured data
+- Normalize and enrich reference fields (county → tax rate)
+- Perform strict sanity checks that must fail loudly if the data is inconsistent
+
+Two specific failure cases are intentionally present:
+
+1. The deed is recorded before it is signed
+2. The numeric and written amounts do not match
+
+Both must be caught by code, not AI.
+
+## High-Level Architecture
+
+```
+Raw OCR Text
+     ↓
+LLM Parser (fuzzy, non-authoritative)
+     ↓
+Pydantic Models (schema enforcement)
+     ↓
+Deterministic Validators (dates, money)
+     ↓
+Deterministic Enricher (county → tax rate)
+     ↓
+Accept or Reject
+```
+
+**Key principle:** AI suggests. Code decides.
+
+## Why the LLM Is Constrained
+
+The LLM is used only for:
+
+- Extracting fields from unstructured text
+- Normalizing formatting
+- Producing structured JSON
+
+The LLM is explicitly instructed to:
+
+- NOT fix errors
+- NOT infer missing data
+- NOT reconcile inconsistencies
+
+All correctness decisions are enforced by:
+
+- **Pydantic schema validation** - Catches malformed data immediately
+- **Deterministic Python logic** - Makes all business decisions
+
+If the LLM output is malformed or incomplete, the pipeline fails immediately.
+
+## Validation Strategy
+
+### 1. Date Sanity Check
+
+The recorded date must not be earlier than the signed date.
+
+```
+Validation Rule: date_recorded >= date_signed
+```
+
+This is enforced using deterministic datetime comparisons. If violated, the deed is rejected with a clear error message.
+
+### 2. Monetary Consistency Check
+
+The numeric amount and the written amount must match exactly.
+
+```
+Validation Rule: amount_numeric == text_to_number(amount_text)
+```
+
+The written amount is converted to a number using deterministic code (`word2number`), not AI. Any discrepancy results in immediate rejection.
+
+**No silent corrections. No heuristics.**
+
+### 3. County Enrichment & Matching
+
+OCR text contains abbreviated or inconsistent county names (e.g., "S. Clara", "ST.CLARA", etc.).
+
+The system:
+
+- Normalizes strings deterministically (handles punctuation, abbreviations like "S." → "Santa", "St." → "Saint")
+- Uses fuzzy matching (via `rapidfuzz`) against `counties.json`
+- Enforces a confidence threshold (70% match score)
+- If a county cannot be confidently matched, the deed is rejected
+
+Examples:
+
+- "S. Clara" → matches "Santa Clara" (normalized + fuzzy match)
+- "Santa Clara County" → matches "Santa Clara" (removes filler words)
+- "Unknown County" → **REJECTED** (no confident match)
 
 ## Project Structure
 
