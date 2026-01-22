@@ -1,7 +1,6 @@
 class BadDeedError(Exception):
     """
-    Base class for all deed validation errors.
-    Used to catch all domain-specific failures at the top level.
+    Base class for all deed validation errors.Used to catch all domain-specific failures at the top level.
     """
     pass
 
@@ -15,8 +14,7 @@ class LLMParseError(BadDeedError):
 
 class UnknownCountyError(BadDeedError):
     """
-    Raised when a county from the deed cannot be confidently matched
-    to reference data.
+    Raised when a county from the deed cannot be confidently matchedto reference data.
     """
     pass
 

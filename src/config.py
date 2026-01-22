@@ -15,10 +15,6 @@ class LLMProvider(Enum):
 def get_llm_provider() -> LLMProvider:
     """
     Get the configured LLM provider from environment variable.
-    
-    Environment variable: LLM_PROVIDER
-    Valid values: "openai" or "apifreellm"
-    Default: "openai"
     """
     provider = os.getenv("LLM_PROVIDER", "openai").lower()
     
@@ -33,10 +29,6 @@ def get_llm_provider() -> LLMProvider:
 def get_api_key() -> str:
     """
     Get the API key for the configured LLM provider.
-    
-    Environment variables:
-    - For OpenAI: OPENAI_API_KEY
-    - For apifreellm: APIFREELLM_API_KEY
     """
     provider = get_llm_provider()
     
@@ -56,11 +48,6 @@ def get_api_key() -> str:
 def get_model_name() -> str:
     """
     Get the model name for the configured provider.
-    
-    Environment variable: LLM_MODEL
-    Defaults:
-    - OpenAI: "gpt-4o-mini"
-    - apifreellm: "gpt-4-turbo"
     """
     provider = get_llm_provider()
     
@@ -73,9 +60,6 @@ def get_model_name() -> str:
 def get_base_url() -> str | None:
     """
     Get the base URL for the LLM API (if needed).
-    
-    Only used for apifreellm provider.
-    Environment variable: LLM_BASE_URL
     """
     provider = get_llm_provider()
     
