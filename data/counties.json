@@ -1,0 +1,14 @@
+[
+    {
+        "name": "Santa Clara",
+        "tax_rate": "0.012"
+    },
+    {
+        "name": "Santa Metro",
+        "tax_rate": "0.011"
+    },
+    {
+        "name": "Santa Cruz",
+        "tax_rate": "0.010"
+    }
+]

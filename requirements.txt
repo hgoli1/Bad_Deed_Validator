@@ -1,6 +1,6 @@
 openai
 instructor
 pydantic
-thefuzz[speedup]
+rapidfuzz
 word2number
 python-dotenv

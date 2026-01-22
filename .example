@@ -1,0 +1,9 @@
+# ---- LLM Provider Switch ----
+USE_OPENAI=false
+
+# ---- OpenAI (only if USE_OPENAI=true) ----
+OPENAI_API_KEY=
+
+# ---- Free LLM (only if USE_OPENAI=false) ----
+FREE_LLM_API_KEY="your_free_llm_api_key_here"
+FREE_LLM_URL=https://apifreellm.com/api/v1/chat
