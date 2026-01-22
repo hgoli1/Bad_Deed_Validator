@@ -1,0 +1,6 @@
+openai
+instructor
+pydantic
+thefuzz[speedup]
+word2number
+python-dotenv
